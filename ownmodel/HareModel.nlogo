@@ -65,6 +65,7 @@ patches-own
 to setup
 
      clear-all
+     set initialPopulation 60
      init_landscape                 ;; imports the landscape from a text file
      init_cultivation               ;; crops are cultivated on the fields
      init_calculate-suitability     ;; calculates habitat suitability for each cell
@@ -72,8 +73,7 @@ to setup
      init_search-homeRange          ;; hares search for a suitable, occupyable homeRange
      init_calculate-suithomeRange   ;; calculates habitat suitability of the homeRange
 
-     init_update-view
-
+     init_view
 
      reset-ticks
      reset-timer
@@ -96,6 +96,28 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; LANDSCAPE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to init_view
+  ask turtles [ show-turtle ]
+         ask patches
+         [
+             if crop = "wheat" [set pcolor 26]
+             if crop = "rape" [set pcolor 46]
+             if crop = "maize" [set pcolor 126]
+             if crop = "barley" [set pcolor 36]
+             if crop = "grassland" [set pcolor 66]
+             if crop = "pasture" [set pcolor 56]
+             if crop = "beets" [set pcolor 136]
+             if crop = "alfalfa" [set pcolor 126]
+             if crop = "set-aside" [set pcolor 76]
+             if crop = "rye" [set pcolor 16]
+             if crop = "triticale" [set pcolor 6]
+             if crop = "oats" [set pcolor 86]
+             if crop = "grass-clover ley" [set pcolor 96]
+             if crop = "ryegrass" [set pcolor 106]
+             if crop = "peas" [set pcolor 62]
+         ]
+end
 
 to init_landscape
 
@@ -295,6 +317,8 @@ end
 
 to init_hares
 
+     crt initialPopulation
+
      ask patches [ set owner [] ]
 
      ask turtles
@@ -335,7 +359,6 @@ to init_calculate-parameters
      set suitabilityReduction 0.02
      set homeRangeNumber 2453                               ;; cells which belong to the homeRange
      set homeRangeRadius 28
-     set initialPopulation 60
 end
 
 
@@ -347,54 +370,34 @@ to init_search-homeRange
      [
          ask homeRange
          [
-             set owner remove myself owner
-             set numberOwners numberOwners - 1
-             set owner remove nobody owner
-             if numberOwners >= 1 [ set suitability (suitability + suitabilityReduction) ]
+             remove-from-home
          ]
+         let found false
+         let i 0
          let searchPatches patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]  ;; hares search for suitable patches
          ifelse any? searchPatches
          [
-             move-to one-of searchPatches                                                                                         ;; 1st try: hares move to one of the suitable patches
-             set homeRange patches in-radius homeRangeRadius
-             ifelse any? homeRange with [numberOwners > maximumOverlap]                                                           ;; if there are too many hares within the home range, they search for another suitable patch
-             [
-                 move-to one-of searchPatches                                                                                     ;; 2nd try: hares move to one of the suitable patches
-                 set homeRange patches in-radius homeRangeRadius
-                 ifelse any? homeRange with [numberOwners > maximumOverlap]                                                       ;; if there are too many hares within the home range, they search for another suitable patch
-                 [
-                     move-to one-of searchPatches                                                                                 ;; 3rd try: hares move to one of the suitable patches
-                     set homeRange patches in-radius homeRangeRadius
-                     ifelse any? homeRange with [numberOwners > maximumOverlap]
-                     [
-                         die
-                     ]                                                                                                            ;; if there are still too many hares within the home range, it dies
-                     [
-                         ask homeRange
-                         [
-                             set owner fput myself owner                                                                          ;; hares occupy their homeRange
-                             set numberOwners numberOwners + 1
-                             if numberOwners > 1 [ set suitability (suitability - suitabilityReduction) ]                         ;; if the cell belongs to two territories, the suitability is reduced by 0.02
-                         ]
-                     ]
-                  ]
-                  [
-                     ask homeRange
-                     [
-                         set owner fput myself owner                                                                              ;; hares occupy their homeRange
-                         set numberOwners numberOwners + 1
-                         if numberOwners > 1 [ set suitability (suitability - suitabilityReduction) ]                             ;; if the cell belongs to two territories, the suitability is reduced by 0.02
-                      ]
-                  ]
-              ]
-              [
-                  ask homeRange
-                  [
-                     set owner fput myself owner                                                                                  ;; hares occupy their homeRange
-                     set numberOwners numberOwners + 1
-                     if numberOwners > 1 [ set suitability (suitability - suitabilityReduction) ]                                 ;; if the cell belongs to two territories, the suitability is reduced by 0.02
-                  ]
-              ]
+            while [(not found) and (i < 3)] [
+
+                move-to one-of searchPatches                                                                                 ;; 3rd try: hares move to one of the suitable patches
+                set homeRange patches in-radius homeRangeRadius
+                                                                                                                          ;; if there are still too many hares within the home range, it dies
+                ifelse any? homeRange with [numberOwners <= maximumOverlap]                                                ;; if there are too many hares within the home range, they search for another suitable patch
+                [
+                    ask homeRange
+                    [
+                        set found true
+                        add-to-home
+                    ]
+
+                ]
+                [
+                    set i i + 1
+                ]
+            ]
+
+            if (i = 3) [die]
+
          ]
          [
              die                                                                                                                  ;; if there are no suitable cells, they die
@@ -406,7 +409,6 @@ to init_search-homeRange
     output-print (word "at start" )
 
 end
-
 
 ;; CALCULATE HABITAT SUITABILITY OF TERRITORIES ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -421,27 +423,31 @@ to init_calculate-suithomeRange
 
 end
 
+to die-of-longevity                                                                                                ;;  hare which reached maximum age
 
-to init_update-view
-  ask turtles [show-turtle]
-     ask patchesx
-         [
-             if crop = "wheat" [set pcolor 26]
-             if crop = "rape" [set pcolor 46]
-             if crop = "maize" [set pcolor 126]
-             if crop = "barley" [set pcolor 36]
-             if crop = "grassland" [set pcolor 66]
-             if crop = "pasture" [set pcolor 56]
-             if crop = "beets" [set pcolor 136]
-             if crop = "alfalfa" [set pcolor 126]
-             if crop = "set-aside" [set pcolor 76]
-             if crop = "rye" [set pcolor 16]
-             if crop = "triticale" [set pcolor 6]
-             if crop = "oats" [set pcolor 86]
-             if crop = "grass-clover ley" [set pcolor 96]
-             if crop = "ryegrass" [set pcolor 106]
-             if crop = "peas" [set pcolor 62]
-         ]
+     ask homeRange
+     [
+         remove-from-home
+      ]
+
+      die
+
+end
+
+to remove-from-home
+    set owner remove myself owner
+    set numberOwners numberOwners - 1
+    set owner remove nobody owner
+    if numberOwners >= 1 [
+        set suitability (suitability + suitabilityReduction)
+        set suitability precision suitability 2
+    ]
+end
+
+to add-to-home
+    set owner fput myself owner
+    set numberOwners numberOwners + 1
+    if numberOwners > 1 [ set suitability (suitability - suitabilityReduction) ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
