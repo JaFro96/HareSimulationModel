@@ -12,46 +12,46 @@ extensions
 
 globals
 [
-  thresholdSuitability    ;; [#]              minimum threshold for habitat suitability<
-  suitabilityReduction     ;; [number]        reduction of the habitat suitability value when home ranges overlap
-  totalcrops               ;; [#]             number of crops in the landscape
-  totalfields              ;; [#]             number of fields in the landscape
+  cropProbability          ;; list            list of cultivation probabilities for each crop
+  cropToSuit               ;; table           table with foraging and breeding values for each crop
   crop-list                ;; [number]        list of all crops within the landscape
   fieldID-list             ;; [number]        list of all field IDs within the landscape
-  cropToSuit               ;; table           table with foraging and breeding values for each crop
-  richness                 ;; [number]        richness of crop types within the landscape
-  fieldTable               ;; table           table with fieldIDs and number of patches for each field
   fieldList                ;; list            list of fieldIDs and number of patches for each field
-  cropProbability          ;; list            list of cultivation probabilities for each crop
+  fieldTable               ;; table           table with fieldIDs and number of patches for each field
   homeRangeRadius          ;; [cells]         radius of the home range
-  maximumOwners            ;; [number]        maximum number of owners assigned to a search cell
-  maximumOverlap           ;; [number]        maximum number of home ranges overlapping
   initialPopulation
+  maximumOverlap           ;; [number]        maximum number of home ranges overlapping
+  maximumOwners            ;; [number]        maximum number of owners assigned to a search cell
+  richness                 ;; [number]        richness of crop types within the landscape
+  suitabilityReduction     ;; [number]        reduction of the habitat suitability value when home ranges overlap
+  thresholdSuitability     ;; [#]              minimum threshold for habitat suitability<
+  totalcrops               ;; [#]             number of crops in the landscape
+  totalfields              ;; [#]             number of fields in the landscape
 ]
 
 turtles-own
 [
-  status                   ;; [string]        hare specification: juvenile, female, male
   age                      ;; [a]             age of the individuals
-  longevity                ;; [a]             maximum age
-  maturity                 ;; [a]             sexual maturity
-  offspring                ;; [number, 12-15] females get 12-15 offspring each year
-  mortalityAdult          ;; [%]             mortality rate of adults
-  mortalityJuvenile       ;; [%]             mortality rate of juveniles
-  suithomeRange            ;; [number, 0-1]   mean habitat suitability of all grid cells within a homeRange
   homeRange                ;; [cells]         grid cells which belong to the homeRange
   homeRangeNumber          ;; [number]        number of cells which belong to the homeRange VV is the same for all
+  longevity                ;; [a]             maximum age
+  maturity                 ;; [a]             sexual maturity
+  mortalityAdult           ;; [%]             mortality rate of adults
+  mortalityJuvenile        ;; [%]             mortality rate of juveniles
+  offspring                ;; [number, 12-15] females get 12-15 offspring each year
+  suithomeRange            ;; [number, 0-1]   mean habitat suitability of all grid cells within a homeRange
+  status                   ;; [string]        hare specification: juvenile, female, male
 ]
 
 patches-own
 [
-  fieldID                  ;; [#]             field ID number
   crop                     ;; [string]        crop type grown on the field
   breeding                 ;; [number, 0-1]   suitability as breeding habitat
+  fieldID                  ;; [#]             field ID number
   foraging                 ;; [number, 0-1]   suitability as forage habitat
-  suitability              ;; [number, 0-1]   habitat suitability of the cell
   numberOwners             ;; [#]             number of hares to whose homeRange the cell belongs to
   owner                    ;; [turtle]        owner of the patch
+  suitability              ;; [number, 0-1]   habitat suitability of the cell
 ]
 
 
@@ -85,6 +85,9 @@ end
 
 to go
 
+     cultivate
+     calculate-habitat-suitability
+     update-view
      tick
 
 end
@@ -101,21 +104,24 @@ to init_view
   ask turtles [ show-turtle ]
          ask patches
          [
-             if crop = "wheat" [set pcolor 26]
-             if crop = "rape" [set pcolor 46]
-             if crop = "maize" [set pcolor 126]
-             if crop = "barley" [set pcolor 36]
-             if crop = "grassland" [set pcolor 66]
-             if crop = "pasture" [set pcolor 56]
-             if crop = "beets" [set pcolor 136]
-             if crop = "alfalfa" [set pcolor 126]
-             if crop = "set-aside" [set pcolor 76]
-             if crop = "rye" [set pcolor 16]
-             if crop = "triticale" [set pcolor 6]
-             if crop = "oats" [set pcolor 86]
-             if crop = "grass-clover ley" [set pcolor 96]
-             if crop = "ryegrass" [set pcolor 106]
-             if crop = "peas" [set pcolor 62]
+             if crop = "wheat" [set pcolor brown]
+             if crop = "rape" [set pcolor yellow + 1]
+             if crop = "maize" [set pcolor yellow - 3]
+             if crop = "barley" [set pcolor orange]
+             if crop = "grassland" [set pcolor lime]
+             if crop = "pasture" [set pcolor green]
+             if crop = "beets" [set pcolor magenta]
+             if crop = "alfalfa" [set pcolor violet]
+             if crop = "set-aside" [set pcolor white]
+             if crop = "rye" [set pcolor yellow + 3]
+             if crop = "triticale" [set pcolor green + 2]
+             if crop = "silphie" [set pcolor orange + 3]
+             if crop = "miscanthus" [set pcolor green - 4]
+             if crop = "grass-clover ley" [set pcolor green - 2]
+
+            ; if crop = "oats" [set pcolor orange + 3]
+            ; if crop = "ryegrass" [set pcolor lime + 2]
+            ; if crop = "peas" [set pcolor cyan]
          ]
 end
 
@@ -220,7 +226,7 @@ to init_cultivation
                          ["miscanthus" 0.050] ["grass-clover ley" 0.050]]
      ]
 
-     set cropProbability reverse cropProbability
+     set cropProbability reverse cropProbability                                                             ;; descending order
 
      foreach cropProbability                                                                                 ;; go through the list of crop types and their proportions and add, for each croptype, fields
      [
@@ -448,6 +454,47 @@ to add-to-home
     set owner fput myself owner
     set numberOwners numberOwners + 1
     if numberOwners > 1 [ set suitability (suitability - suitabilityReduction) ]
+end
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Go functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; CULTIVATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+to cultivate
+    init_cultivation
+end
+
+to calculate-habitat-suitability
+    init_calculate-suitability
+end
+
+to update-view
+
+  ask turtles [ show-turtle ]
+         ask patches
+         [
+             if crop = "wheat" [set pcolor brown]
+             if crop = "rape" [set pcolor yellow + 1]
+             if crop = "maize" [set pcolor yellow - 3]
+             if crop = "barley" [set pcolor orange]
+             if crop = "grassland" [set pcolor lime]
+             if crop = "pasture" [set pcolor green]
+             if crop = "beets" [set pcolor magenta]
+             if crop = "alfalfa" [set pcolor violet]
+             if crop = "set-aside" [set pcolor white]
+             if crop = "rye" [set pcolor yellow + 3]
+             if crop = "triticale" [set pcolor green + 2]
+             if crop = "silphie" [set pcolor orange + 3]
+             if crop = "miscanthus" [set pcolor green - 4]
+             if crop = "grass-clover ley" [set pcolor green - 2]
+
+            ; if crop = "oats" [set pcolor orange + 3]
+            ; if crop = "ryegrass" [set pcolor lime + 2]
+            ; if crop = "peas" [set pcolor cyan]
+         ]
+
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -1101,7 +1148,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
