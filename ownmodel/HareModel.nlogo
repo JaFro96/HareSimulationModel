@@ -85,6 +85,7 @@ end
 
 to go
 
+     population
      cultivate
      calculate-habitat-suitability
      update-view
@@ -349,6 +350,34 @@ to init_hares
 
 end
 
+to population
+  age
+  establish_home_range
+  die_of_longevity
+end
+
+to age
+  ask turtles
+  [
+    set age age + 1
+    if status = "juvenile" [ set status one-of["female" "male"] ]
+  ]
+end
+
+to establish_home_range
+
+end
+
+to die_of_longevity
+  ask turtles
+  [
+    if age = longevity
+    [
+      ask homeRange [ remove-from-home ]
+      die
+    ]
+  ]
+end
 
 ;; CALCULATE HARE PARAMETERS ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -426,17 +455,6 @@ to init_calculate-suithomeRange
          set suithomeRange ((sum [suitability] of homeRange) / homeRangeNumber)            ;; the suitability of the homeRange is calculated
          set suithomeRange precision suithomeRange 2
      ]
-
-end
-
-to die-of-longevity                                                                                                ;;  hare which reached maximum age
-
-     ask homeRange
-     [
-         remove-from-home
-      ]
-
-      die
 
 end
 
