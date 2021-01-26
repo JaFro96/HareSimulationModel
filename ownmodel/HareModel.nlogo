@@ -536,8 +536,8 @@ GRAPHICS-WINDOW
 399
 -399
 0
-1
-1
+0
+0
 1
 ticks
 30.0
@@ -638,16 +638,6 @@ R
 NIL
 NIL
 1
-
-TEXTBOX
-1042
-431
-1332
-786
-NIL
-11
-0.0
-0
 
 CHOOSER
 21
@@ -1166,7 +1156,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
