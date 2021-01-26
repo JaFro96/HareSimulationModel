@@ -87,6 +87,11 @@ to go
 
      cultivate
      calculate-habitat-suitability
+
+
+     search_homeRange_matures
+     reproduce
+     survive
      update-view
      tick
 
@@ -380,15 +385,15 @@ to init_search-homeRange
          ]
          let found false
          let i 0
-         let searchPatches patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]  ;; hares search for suitable patches
+         let searchPatches patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]
          ifelse any? searchPatches
          [
             while [(not found) and (i < 3)] [
 
-                move-to one-of searchPatches                                                                                 ;; 3rd try: hares move to one of the suitable patches
+                move-to one-of searchPatches
                 set homeRange patches in-radius homeRangeRadius
-                                                                                                                          ;; if there are still too many hares within the home range, it dies
-                ifelse any? homeRange with [numberOwners <= maximumOverlap]                                                ;; if there are too many hares within the home range, they search for another suitable patch
+
+                ifelse any? homeRange with [numberOwners <= maximumOverlap]
                 [
                     ask homeRange
                     [
@@ -467,8 +472,121 @@ to cultivate
 end
 
 to calculate-habitat-suitability
-    init_calculate-suitability
+    if ( totalcrops >= 5) and (totalcrops <= 10) [ set richness 0.60 ]                                    ;; the crop richness is derived from the number of crops in the landscape
+     if ( totalcrops >= 11) and (totalcrops <= 13) [ set richness 0.80 ]
+     if ( totalcrops >= 14) [ set richness 1.00 ]
+
+     ask patches
+     [
+         set foraging (item 0 table:get cropToSuit crop)
+         set breeding (item 1 table:get cropToSuit crop)
+         set suitability (foraging * breeding * richness)                                                    ;; foraging * breeding * richness
+         set suitability suitability ^ (1 / 3)                                                               ;; the geometric mean of foraging, breeding and richness results in the general suitability of the cell
+         set suitability precision suitability 2
+     ]
 end
+
+
+to calculate-suithomeRange
+  init_calculate-suithomeRange
+end
+
+to search_homeRange_matures
+  let matures turtles with [status != "juvenile" ]
+
+  ;;First try to find a suitable home for every turtle
+  ask matures [
+    let searchPatches patches in-radius homeRangeRadius with [ (suitability > thresholdSuitability) and numberOwners < maximumOwners]
+    if any? searchPatches [
+         ask homeRange [
+              remove-from-home
+         ]
+         move-to one-of searchPatches with-max [suitability]                                                             ;; 1st try: hares move to one of the suitable patches
+         set homeRange patches in-radius homeRangeRadius
+         ask homeRange
+         [
+             add-to-home
+         ]
+         set suithomeRange ((sum [suitability] of homeRange) / homeRangeNumber)                                          ;; the suitability of the homeRange is calculated
+         set suithomeRange precision suithomeRange 2
+    ]
+
+  ]
+
+  ;;Second and third try
+  let i 0
+  while [i < 2] [
+    ask matures with [(suithomeRange < thresholdSuitability) or (any? homeRange with [numberOwners > maximumOverlap])] [
+      let searchPatches patches in-radius homeRangeRadius with [ (suitability > thresholdSuitability) and numberOwners < maximumOwners]
+      if any? searchPatches [
+        ask homeRange [
+          remove-from-home
+        ]
+        move-to one-of searchPatches with-max [suitability]                                                             ;; 1st try: hares move to one of the suitable patches
+        set homeRange patches in-radius homeRangeRadius
+        ask homeRange
+        [
+          add-to-home
+        ]
+        set suithomeRange ((sum [suitability] of homeRange) / homeRangeNumber)                                          ;; the suitability of the homeRange is calculated
+        set suithomeRange precision suithomeRange 2
+      ]
+    ]
+    set i i + 1
+  ]
+
+  ;; let turtles who did not make it die
+  ask matures with [(suithomeRange < thresholdSuitability)]
+     [
+        ;; get the most updated suitability
+         set suithomeRange ((sum [suitability] of homeRange) / homeRangeNumber)                                              ;; the suitability of the homeRange is calculated
+         set suithomeRange precision suithomeRange 2
+         if suithomeRange < thresholdSuitability                                                                             ;; if there is no suitable home range, die
+         [
+             ask homeRange
+             [
+                 remove-from-home
+             ]
+             die
+         ]
+     ]
+end
+
+
+to reproduce
+  ask turtles with [ status = "female" ] [
+       set offspring (12 + random 3) ;; previously hatched females would have the same rate as there mother
+       hatch offspring [
+           set status "juvenile"
+           set color yellow
+           set size 10
+           set age 0
+           set suithomeRange 0
+           set homeRange []
+       ]
+  ]
+end
+
+to survive
+  ask turtles with [ status != "juvenile" ] [
+      if random-float 1 <= mortalityAdult [
+         ask turtles-here with [status = "juvenile"] [ die ]
+         ask homeRange [
+            remove-from-home
+         ]
+         die
+      ]
+  ]
+
+  ask turtles with [status = "juvenile"]
+     [
+         if random-float 1 <= mortalityJuvenile
+         [
+             die
+         ]
+     ]
+end
+
 
 to update-view
 
