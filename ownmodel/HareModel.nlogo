@@ -356,21 +356,38 @@ to init_hares
 end
 
 to population
-  age
+  aging
   establish_home_range
   die_of_longevity
 end
 
-to age
+to aging
   ask turtles
   [
     set age age + 1
-    if status = "juvenile" [ set status one-of["female" "male"] ]
+    if status = "juvenile" [
+      set status one-of["female" "male"]
+      ifelse status = "female" [ set color red ] [ set color blue]
+    ]
   ]
 end
 
 to establish_home_range
-
+  let counter 0
+  let numberTrials 3
+  let patchesSearched patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]
+  ifelse not any? patchesSearched [ die ] [
+    while [(counter < numberTrials)] [
+       move-to one-of patchesSearched
+       set homeRange patches in-radius homeRangeRadius
+    ifelse not any? homeRange with [numberOwners <= maximumOverlap]
+    [ set counter counter + 1 ] ; not sucessfull -> start with the next trial
+    [ set homeRange patches in-radius homeRangeRadius
+      ask homeRange [ add-to-home ]
+      set counter numberTrials + 1 ; exit for loop as home range was established sucessfully
+    ]
+    ]
+  ]
 end
 
 to die_of_longevity
