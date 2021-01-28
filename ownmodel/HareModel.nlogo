@@ -135,7 +135,9 @@ to init_landscape
 
      set fieldID-list []
 
-     file-open "./landscape_6.8ha.txt"
+     ;file-open "./landscape_6.8ha.txt"
+     file-open "./landscape_munsterland_27.5ha.txt"
+
      while [not file-at-end?]
      [
          let next-x file-read
@@ -231,6 +233,11 @@ to init_cultivation
                          ["beets" 0.050] ["alfalfa" 0.050] ["set-aside" 0.050] ["rye" 0.050] ["triticale" 0.050] ["silphie" 0.050]
                          ["miscanthus" 0.050] ["grass-clover ley" 0.050]]
      ]
+
+     ;code above can just be removed I guess - crop probability in some Münsterland areas:
+
+     set cropProbability [["wheat" 0.35] ["maize" 0.35] ["pasture" 0.1] ["grassland" 0.14] ["barley" 0.02] ["rape" 0.02]
+                         ["rye" 0.02]]
 
      set cropProbability reverse cropProbability                                                             ;; descending order
 
@@ -791,7 +798,7 @@ The Hare model was developed by Maria Langhammer and Volker Grimm. For correspon
 
 This model description follows the ODD (Overview, Design concepts, Details) protocol for describing individual-based models (Grimm et al., 2006, Grimm et al., 2010). The model is implemented in NetLogo 6.0.3 (Wilensky, 1999) and used to simulate brown hare population dynamics in bioenergy-driven landscapes.
 
-The design of the model is in parts adopted from Animal Functional Type (AFT) model developed by Scherer et al. (2016). The landscapes were generated using the model developed by Engel et al. (2012), which was further developed by Everaars et al. (2014).	
+The design of the model is in parts adopted from Animal Functional Type (AFT) model developed by Scherer et al. (2016). The landscapes were generated using the model developed by Engel et al. (2012), which was further developed by Everaars et al. (2014).
 
 ##  Overview
 
@@ -811,7 +818,7 @@ The model includes two types of entities: square grid cells and individuals (har
 
 ![Release] (file:Table2_HareParameters.png)
 <sup>a</sup> Another landscape in South Germany, Bavaria, investigated by Ullmann et al. (2018) with an average field size of 3 ha, showed an average hare home range of 19 ha. Based on these data, we interpolated the presumed average value for Germany to 25 ha. This value is comparable to values of 21 ha in Rühe & Hohmann (2004) and 29 ha in Broekhuizen & Maaskamp (1981). A home range of 25 ha corresponds to a radius of 28 grid cells in the model (_Uckermark_), a home range of 55 ha to 42 grid cells (_Germany_).
-<sup>b</sup> Hard-coded via algorithm. 
+<sup>b</sup> Hard-coded via algorithm.
 
 Grid cells represent 100 m² and are characterised by their coordinates and the variables assigned to them. Each grid cell is covered by one of 14 crop species determined by the variable _crop_, from which the variables (1) suitability as forage habitat (_foraging_ _FH_), (2) suitability as breeding habitat (_breeding_ _BH_), and (3) crop richness (_richness_ _RC_) are derived. The foraging and breeding values range from 0.0 (not suitable) to 1.0 (very well-suited) and are based on expert knowledge drawn from the literature (Figure 1, Table 3). If we did not find any information about a certain crop, we derived the value of a similar crop (e.g., for cereals) or assumed a mean value of 0.5. An overview of the literature on the ecology of the brown hare, which we have used to assess foraging and breeding preferences, is given in the Supplementary Material.
 
@@ -822,7 +829,7 @@ The geometric mean of all three variables (_FH_, _BH_, _RC_) results in the habi
 
 _SH_=∛(_FH_ × _BH_ × _RC_)
 
-**Figure 1:** Habitat suitability of the base scenarios in _Uckermark_ (left) und _Germany_ (right) as a result of the geometric mean of suitability as forage habitat, suitability as breeding habitat and crop richness. The green colours show habitats above the suitability threshold of 0.5. The grey colours show habitats below the suitability threshold of 0.5. Darker green indicates higher suitability, and lighter grey indicates lower suitability. 
+**Figure 1:** Habitat suitability of the base scenarios in _Uckermark_ (left) und _Germany_ (right) as a result of the geometric mean of suitability as forage habitat, suitability as breeding habitat and crop richness. The green colours show habitats above the suitability threshold of 0.5. The grey colours show habitats below the suitability threshold of 0.5. Darker green indicates higher suitability, and lighter grey indicates lower suitability.
 
 ![Release] (file:Figure1_HabitatSuitability.png)
 
@@ -838,7 +845,7 @@ CC: Crop composition scenarios
 
 The hare home ranges in the model landscapes are distributed in a circular shape around the individuals. Females and males have the same home range size in the model, although it can be different in reality. Because the model proceeds in annual steps, juveniles do not have their own home range in the year of birth. In the following year, they are considered sexually mature and are looking for their own home range. The home ranges of several individuals can overlap. However, a grid cell can only be assigned to the home range of a maximum of 10 hares (Figure 2). For each additional hare that marks a cell belonging to its home range, the habitat suitability value of the cell is reduced by 0.02. Both parameters, _homeRangeOverlap_ and _suitabilityReduction_, as well as other unknown parameters (Table 2) were estimated by calibrating the model with the hare counts in the reference landscape in the Uckermark of 5 individuals per 100 ha (data provided by the BioMove Research Training Group DFG GRK 2118/1). They indirectly simulate competition for habitat and avoid unnatural clumping of too many individuals per area.
 
-**Figure 2:** Hare home ranges in the base scenarios in _Uckermark_ (left) und _Germany_ (right). Blue arrows mark males, red arrows indicate females and yellow arrows indicate females with juveniles. The home ranges are represented as circles surrounding the hares. The green colours show habitats above the suitability threshold of 0.5. The grey colours show habitats below the suitability threshold of 0.5. Darker green indicates higher, and lighter grey indicates lower suitability. Note the tracking of habitat suitability by the distribution of hare home ranges and the partly high overlap of home ranges. 
+**Figure 2:** Hare home ranges in the base scenarios in _Uckermark_ (left) und _Germany_ (right). Blue arrows mark males, red arrows indicate females and yellow arrows indicate females with juveniles. The home ranges are represented as circles surrounding the hares. The green colours show habitats above the suitability threshold of 0.5. The grey colours show habitats below the suitability threshold of 0.5. Darker green indicates higher, and lighter grey indicates lower suitability. Note the tracking of habitat suitability by the distribution of hare home ranges and the partly high overlap of home ranges.
 
 ![Release] (file:Figure2_HareHomeRanges.png)
 
@@ -855,7 +862,7 @@ First, all hares become one year older, and juveniles become young adults (_agin
 
 Each simulation run ends after 80 years or when the population becomes extinct. The individuals and grid cells are processed in a random order each time step to avoid priority effects.
 
-**Figure 3:** Flowchart of the habitat-based hare model including initialization and sub-models. For a detailed description of each process, see Section 7 _Submodels_. 
+**Figure 3:** Flowchart of the habitat-based hare model including initialization and sub-models. For a detailed description of each process, see Section 7 _Submodels_.
 
 ![Release] (file:Figure3_Flowchart.png)
 
@@ -868,7 +875,7 @@ A basic principle of the model is to assign home ranges according to the quality
 
 ### Emergence
 
-Hare behaviour is largely imposed, in terms of both home range establishment and selection and demographic rates. 
+Hare behaviour is largely imposed, in terms of both home range establishment and selection and demographic rates.
 
 ### Adaptation
 
@@ -888,7 +895,7 @@ The configuration and composition of the landscapes is partly random. (1) The ag
 
 ### Observation
 
-The main output value is the average number of females and males for the last 50 years after the end of the simulation. The first 30 years are discarded to avoid transient effects. 
+The main output value is the average number of females and males for the last 50 years after the end of the simulation. The first 30 years are discarded to avoid transient effects.
 
 ## Initialization
 
@@ -911,7 +918,7 @@ Because the model follows an annual rhythm, all individuals get one year older i
 
 Each cell is assigned a new crop species. Fourteen different crop species are available for selection: alfalfa, barley, beets, grassland, grass-clover ley, maize, miscanthus, oilseed rape, pasture, rye, set-aside, mixed silphie, triticale and wheat. The proportion of a certain crop species in the landscape is defined by a cultivation probability, with the selection of the crop species per field remaining the same throughout each simulation run for each mitigation scenario. Thus, as in reality, crops are assigned to the fields each year, and an evaluation for the hare population takes place. Table 5 shows the cultivation probabilities of all crop species for each scenario.
 
-**Table 5:** The simulated crop proportions for each of the 14 crops and for each scenario. The two base scenarios (UM, GER) match the crop distributions in the reference landscape _Uckermark_ and the average distribution in _Germany_ 2017 for the ten most common crops. For each base scenario, six mitigation strategies are explored: three alternative energy plant scenarios and three crop composition scenarios. For the alternative energy plant scenarios (AE1-AE3), the proportions of mixed silphie, miscanthus and grass-clover ley were increased by 10% in each case. For the first two crop composition scenarios (CC1, CC2), the proportions of alfalfa and set-aside were increased by 10% in each case. Crop composition scenario 3 (CC3) integrates all 14 crops in the landscape. Key changes are displayed in bold. 
+**Table 5:** The simulated crop proportions for each of the 14 crops and for each scenario. The two base scenarios (UM, GER) match the crop distributions in the reference landscape _Uckermark_ and the average distribution in _Germany_ 2017 for the ten most common crops. For each base scenario, six mitigation strategies are explored: three alternative energy plant scenarios and three crop composition scenarios. For the alternative energy plant scenarios (AE1-AE3), the proportions of mixed silphie, miscanthus and grass-clover ley were increased by 10% in each case. For the first two crop composition scenarios (CC1, CC2), the proportions of alfalfa and set-aside were increased by 10% in each case. Crop composition scenario 3 (CC3) integrates all 14 crops in the landscape. Key changes are displayed in bold.
 
 ![Release] (file:Table5_SimulatedCropProportions.png)
 
@@ -925,7 +932,7 @@ Based on this value, the mean habitat suitability of each hare home range is cal
 
 ### Dispersal
 
-After crop cultivation each year, all adult hares search within their home range for a suitable new position from where to establish a new home range. Therefore, the individual selects a suitable cell in the home range (habitat suitability ≥ 0.5, number of owners ≤ 7) and moves there. Then, it calculates the mean habitat suitability for the prospective home range. If it is sufficient, the hare stays there and establishes its home range. As a consequence, habitat suitability is increased by 0.2 in all grid cells of the original home range and decreased by 0.2 in all cells of the new home range. If the conditions do not apply, the hare searches for a new target cell and tries to find a suitable home range in the same way. If that does not work either, it succeeds in the third try or dies. 
+After crop cultivation each year, all adult hares search within their home range for a suitable new position from where to establish a new home range. Therefore, the individual selects a suitable cell in the home range (habitat suitability ≥ 0.5, number of owners ≤ 7) and moves there. Then, it calculates the mean habitat suitability for the prospective home range. If it is sufficient, the hare stays there and establishes its home range. As a consequence, habitat suitability is increased by 0.2 in all grid cells of the original home range and decreased by 0.2 in all cells of the new home range. If the conditions do not apply, the hare searches for a new target cell and tries to find a suitable home range in the same way. If that does not work either, it succeeds in the third try or dies.
 
 Juveniles that mature are searching for a home range within a radius of 150 cells (1.5 km) prior to the assignment of new crop species. Their search radius is larger than that of the adults in order to find suitable grid cells outside the mother’s home range. The other rules applied here are similar to those for adults: they search for a suitable grid cell, defined by suitability and the requirement that no more than nine hares use this cell as part of their home range. Then, if the suitability of the entire home range is, such as with the adults, too low, they try again, but die after the third unsuccessful attempt. Thus, the number of adults alive before reproduction takes place is determined by habitat suitability, which in turn, depends on crop species, field configurations, and the density of conspecifics. These factors affect hare distribution and abundance two times per year, for establishing young adults, and, after new assignments of crops, for established adults.
 
