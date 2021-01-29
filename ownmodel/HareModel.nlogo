@@ -335,8 +335,8 @@ to init_hares
 end
 
 to population
-  aging
   establish_home_range
+  aging
   die_of_longevity
 end
 
@@ -352,7 +352,7 @@ to aging
 end
 
 to establish_home_range
-  ask turtles
+  ask turtles with [status = "juvenile"]
   [
     let counter 0
     let numberTrials 3
@@ -1265,7 +1265,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.0.4
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
