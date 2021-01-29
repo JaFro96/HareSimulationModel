@@ -19,7 +19,7 @@ globals
   fieldList                ;; list            list of fieldIDs and number of patches for each field
   fieldTable               ;; table           table with fieldIDs and number of patches for each field
   homeRangeRadius          ;; [cells]         radius of the home range
-  initialPopulation
+  initialPopulation        ; to check population size: show count turtles with [status = "female" or status = "male"]  / 16
   maximumOverlap           ;; [number]        maximum number of home ranges overlapping
   maximumOwners            ;; [number]        maximum number of owners assigned to a search cell
   richness                 ;; [number]        richness of crop types within the landscape
@@ -67,13 +67,12 @@ to setup
      clear-all
      set initialPopulation 60
      init_landscape                 ;; imports the landscape from a text file
-     init_cultivation               ;; crops are cultivated on the fields
+     cultivate                      ;; crops are cultivated on the fields
      init_calculate-suitability     ;; calculates habitat suitability for each cell
      init_hares                     ;; ceates the initial population
      init_search-homeRange          ;; hares search for a suitable, occupyable homeRange
      init_calculate-suithomeRange   ;; calculates habitat suitability of the homeRange
-
-     init_view
+     update-view
 
      reset-ticks
      reset-timer
@@ -88,12 +87,10 @@ to go
      population
      cultivate
      calculate-habitat-suitability
-
-
      search_homeRange_matures
      reproduce
      survive
-     update-view
+
      tick
 
 end
@@ -105,31 +102,6 @@ end
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; LANDSCAPE ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-to init_view
-  ask turtles [ show-turtle ]
-         ask patches
-         [
-             if crop = "wheat" [set pcolor brown]
-             if crop = "rape" [set pcolor yellow + 1]
-             if crop = "maize" [set pcolor yellow - 3]
-             if crop = "barley" [set pcolor orange]
-             if crop = "grassland" [set pcolor lime]
-             if crop = "pasture" [set pcolor green]
-             if crop = "beets" [set pcolor magenta]
-             if crop = "alfalfa" [set pcolor violet]
-             if crop = "set-aside" [set pcolor white]
-             if crop = "rye" [set pcolor yellow + 3]
-             if crop = "triticale" [set pcolor green + 2]
-             if crop = "silphie" [set pcolor orange + 3]
-             if crop = "miscanthus" [set pcolor green - 4]
-             if crop = "grass-clover ley" [set pcolor green - 2]
-
-            ; if crop = "oats" [set pcolor orange + 3]
-            ; if crop = "ryegrass" [set pcolor lime + 2]
-            ; if crop = "peas" [set pcolor cyan]
-         ]
-end
 
 to init_landscape
 
@@ -173,7 +145,7 @@ end
 
 ;; Cultivation ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to init_cultivation
+to cultivate
 
      set fieldTable table:group-agents patches [fieldID]                                                   ;; creates a table with index/key "fieldID" and the agentset of patches as value
      set fieldList table:to-list fieldTable                                                                ;; transforms the table into list of elements, which are lists with elements themselves: the fieldID, and the corresponding set of patches
@@ -235,7 +207,7 @@ to init_cultivation
      ]
 
      ;code above can just be removed I guess - crop probability in some Münsterland areas:
-
+     ; no, we need different scenarios to compare the effects
      set cropProbability [["wheat" 0.35] ["maize" 0.35] ["pasture" 0.1] ["grassland" 0.14] ["barley" 0.02] ["rape" 0.02]
                          ["rye" 0.02]]
 
@@ -380,19 +352,22 @@ to aging
 end
 
 to establish_home_range
-  let counter 0
-  let numberTrials 3
-  let patchesSearched patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]
-  ifelse not any? patchesSearched [ die ] [
-    while [(counter < numberTrials)] [
-       move-to one-of patchesSearched
-       set homeRange patches in-radius homeRangeRadius
-    ifelse not any? homeRange with [numberOwners <= maximumOverlap]
-    [ set counter counter + 1 ] ; not sucessfull -> start with the next trial
-    [ set homeRange patches in-radius homeRangeRadius
-      ask homeRange [ add-to-home ]
-      set counter numberTrials + 1 ; exit for loop as home range was established sucessfully
-    ]
+  ask turtles
+  [
+    let counter 0
+    let numberTrials 3
+    let patchesSearched patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]
+    ifelse not any? patchesSearched [ die ] [
+      while [(counter < numberTrials)] [
+        move-to one-of patchesSearched
+        set homeRange patches in-radius homeRangeRadius
+        ifelse not any? homeRange with [numberOwners <= maximumOverlap]
+        [ set counter counter + 1 ] ; not sucessfull -> start with the next trial
+        [ set homeRange patches in-radius homeRangeRadius
+          ask homeRange [ add-to-home ]
+          set counter numberTrials + 1 ; exit for loop as home range was established sucessfully
+        ]
+      ]
     ]
   ]
 end
@@ -507,11 +482,7 @@ end
 ;; Go functions ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; CULTIVATION ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-to cultivate
-    init_cultivation
-end
 
 to calculate-habitat-suitability
     if ( totalcrops >= 5) and (totalcrops <= 10) [ set richness 0.60 ]                                    ;; the crop richness is derived from the number of crops in the landscape
@@ -597,7 +568,7 @@ end
 
 to reproduce
   ask turtles with [ status = "female" ] [
-       set offspring (12 + random 3) ;; previously hatched females would have the same rate as there mother
+       set offspring (12 + random 3) ;; previously hatched females would have the same rate as their mother
        hatch offspring [
            set status "juvenile"
            set color yellow
@@ -649,10 +620,6 @@ to update-view
              if crop = "silphie" [set pcolor orange + 3]
              if crop = "miscanthus" [set pcolor green - 4]
              if crop = "grass-clover ley" [set pcolor green - 2]
-
-            ; if crop = "oats" [set pcolor orange + 3]
-            ; if crop = "ryegrass" [set pcolor lime + 2]
-            ; if crop = "peas" [set pcolor cyan]
          ]
 
 end
@@ -789,7 +756,7 @@ CHOOSER
 Scenario
 Scenario
 "Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness"
-6
+3
 
 @#$#@#$#@
 # Hare model: ODD protocol
@@ -1298,7 +1265,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
