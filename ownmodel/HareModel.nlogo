@@ -65,7 +65,7 @@ patches-own
 to setup
 
      clear-all
-     set initialPopulation 60
+     set initialPopulation 80
      init_landscape                 ;; imports the landscape from a text file
      cultivate                      ;; crops are cultivated on the fields
      init_calculate-suitability     ;; calculates habitat suitability for each cell
@@ -83,7 +83,12 @@ end
 ;; GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
-     if (ticks = 80 or count turtles = 0) [stop]
+     if (ticks = 20) [
+       print  "Number of turtles per km2: "
+       print (count turtles with [status = "female" or status = "male"] / 16)
+       stop
+     ]
+
      population
      cultivate
      calculate-habitat-suitability
@@ -106,8 +111,8 @@ to init_landscape
 
      set fieldID-list []
 
-     ;file-open "./landscape_6.8ha.txt"
-     file-open "./landscape_munsterland_27.5ha.txt"
+     file-open "./landscape_6.8ha.txt"
+     ;file-open "./landscape_munsterland_27.5ha.txt"
 
      while [not file-at-end?]
      [
@@ -316,6 +321,7 @@ to init_hares
 
      ask turtles
      [
+         ; set shape "rabbit"            ; for the fancy style ;)
          set size 10
          setxy random-pxcor random-pycor
 
@@ -757,7 +763,7 @@ CHOOSER
 Scenario
 Scenario
 "Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness" "Muenster"
-1
+0
 
 PLOT
 16
@@ -1170,6 +1176,24 @@ Polygon -7500403 true true 165 180 165 210 225 180 255 120 210 135
 Polygon -7500403 true true 135 105 90 60 45 45 75 105 135 135
 Polygon -7500403 true true 165 105 165 135 225 105 255 45 210 60
 Polygon -7500403 true true 135 90 120 45 150 15 180 45 165 90
+
+rabbit
+false
+0
+Polygon -7500403 true true 61 150 76 180 91 195 103 214 91 240 76 255 61 270 76 270 106 255 132 209 151 210 181 210 211 240 196 255 181 255 166 247 151 255 166 270 211 270 241 255 240 210 270 225 285 165 256 135 226 105 166 90 91 105
+Polygon -7500403 true true 75 164 94 104 70 82 45 89 19 104 4 149 19 164 37 162 59 153
+Polygon -7500403 true true 64 98 96 87 138 26 130 15 97 36 54 86
+Polygon -7500403 true true 49 89 57 47 78 4 89 20 70 88
+Circle -16777216 true false 37 103 16
+Line -16777216 false 44 150 104 150
+Line -16777216 false 39 158 84 175
+Line -16777216 false 29 159 57 195
+Polygon -5825686 true false 0 150 15 165 15 150
+Polygon -5825686 true false 76 90 97 47 130 32
+Line -16777216 false 180 210 165 180
+Line -16777216 false 165 180 180 165
+Line -16777216 false 180 165 225 165
+Line -16777216 false 180 210 210 240
 
 sheep
 false
