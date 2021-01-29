@@ -83,14 +83,13 @@ end
 ;; GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
-
+     if (ticks = 80 or count turtles = 0) [stop]
      population
      cultivate
      calculate-habitat-suitability
      search_homeRange_matures
      reproduce
      survive
-
      tick
 
 end
@@ -208,8 +207,11 @@ to cultivate
 
      ;code above can just be removed I guess - crop probability in some Münsterland areas:
      ; no, we need different scenarios to compare the effects
+     if (Scenario = "Muenster")
+     [
      set cropProbability [["wheat" 0.35] ["maize" 0.35] ["pasture" 0.1] ["grassland" 0.14] ["barley" 0.02] ["rape" 0.02]
                          ["rye" 0.02]]
+     ]
 
      set cropProbability reverse cropProbability                                                             ;; descending order
 
@@ -645,8 +647,8 @@ GRAPHICS-WINDOW
 399
 -399
 0
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -755,8 +757,8 @@ CHOOSER
 131
 Scenario
 Scenario
-"Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness"
-3
+"Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness" "Muenster"
+1
 
 @#$#@#$#@
 # Hare model: ODD protocol
@@ -1265,7 +1267,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.0.4
+NetLogo 6.1.1
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
