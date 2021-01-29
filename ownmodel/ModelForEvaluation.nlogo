@@ -120,7 +120,7 @@ to go
        reset-ticks
        reset-timer
 
-       while [ticks < 3] [
+       while [ticks < 20] [
             population
             cultivate
             calculate-habitat-suitability
