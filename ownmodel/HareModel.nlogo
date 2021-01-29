@@ -355,6 +355,7 @@ to establish_home_range
   ask turtles with [status = "juvenile"]
   [
     let counter 0
+    let found false
     let numberTrials 3
     let patchesSearched patches in-radius homeRangeRadius with [(numberOwners < maximumOwners) and (suitability >= thresholdSuitability)]
     ifelse not any? patchesSearched [ die ] [
@@ -365,21 +366,19 @@ to establish_home_range
         [ set counter counter + 1 ] ; not sucessfull -> start with the next trial
         [ set homeRange patches in-radius homeRangeRadius
           ask homeRange [ add-to-home ]
+          set found true
           set counter numberTrials + 1 ; exit for loop as home range was established sucessfully
         ]
       ]
+      if not found [ die ]
     ]
   ]
 end
 
 to die_of_longevity
-  ask turtles
-  [
-    if age = longevity
-    [
-      ask homeRange [ remove-from-home ]
-      die
-    ]
+  ask turtles with [age >= longevity] [
+    ask homeRange [ remove-from-home ]
+    die
   ]
 end
 
@@ -435,7 +434,7 @@ to init_search-homeRange
                 ]
             ]
 
-            if (i = 3) [die]
+            if not found [die]
 
          ]
          [
@@ -509,7 +508,7 @@ to search_homeRange_matures
 
   ;;First try to find a suitable home for every turtle
   ask matures [
-    let searchPatches patches in-radius homeRangeRadius with [ (suitability > thresholdSuitability) and numberOwners < maximumOwners]
+    let searchPatches patches in-radius homeRangeRadius with [ ((suitability > thresholdSuitability) and (numberOwners < maximumOwners))]
     if any? searchPatches [
          ask homeRange [
               remove-from-home
@@ -663,7 +662,7 @@ year
 100.0
 0.0
 10.0
-false
+true
 false
 "" ""
 PENS
@@ -757,6 +756,24 @@ Scenario
 Scenario
 "Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness"
 3
+
+PLOT
+16
+488
+216
+638
+age
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" "plot mean [ age ] of turtles"
+PENS
+"default" 1.0 0 -16777216 true "" "plot mean [ age ] of turtles"
 
 @#$#@#$#@
 # Hare model: ODD protocol
