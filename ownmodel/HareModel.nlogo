@@ -175,8 +175,8 @@ to cultivate
 
      ;means for Münsterland:
 
-     set cropProbability [["wheat" 0.44150374] ["rape" 0.02147856] ["maize" 0.37766468] ["barley" 0] ["grassland" 0.14915667] ["pasture" 0]
-                         ["beets" 0.00184358] ["alfalfa" 0.00835277] ["set-aside" 0] ["rye" 0.02147856]]
+     set cropProbability [["wheat" 0.44150374] ["maize" 0.37766468] ["grassland" 0.14915667] ["rape" 0.02147856] ["rye" 0.02147856]
+                         ["alfalfa" 0.00835277] ["beets" 0.00184358]]
 
     ;original settings below
 
