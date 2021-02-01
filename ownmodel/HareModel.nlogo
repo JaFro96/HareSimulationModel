@@ -260,6 +260,12 @@ to cultivate
      [
      set cropProbability [["wheat" 0.442] ["maize" 0.299] ["grassland" 0.149] ["alfalfa" 0.008] ["beets" 0.002] ["set-aside" 0.100]] ; ["rape" 0.000]
      ]
+
+     if (Scenario = "Crop richness")
+     [
+     set cropProbability [["wheat" 0.265] ["maize" 0.227] ["grassland" 0.089] ["rape" 0.012] ["alfalfa" 0.005] ["beets" 0.002] ["pasture" 0.050]
+        ["barley" 0.050]["set-aside" 0.050] ["rye" 0.050] ["triticale" 0.050] ["silphie" 0.050] ["miscanthus" 0.050] ["grass-clover ley" 0.050]]
+     ]
   ]
 
 
@@ -816,7 +822,7 @@ CHOOSER
 Scenario
 Scenario
 "Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness"
-0
+3
 
 PLOT
 16
