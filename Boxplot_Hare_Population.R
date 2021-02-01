@@ -6,30 +6,11 @@ ger_cc1 = c(38,36.75,39.6875,38.8125,39.81,40.06)
 ger_cc2 = c(37.94,38.94,40.5,40.3125,38.25,40.81)
 ger_cc3 = c(38.69,36.56,38.25,38.5,37.38,40.31)
 
-muensterland_basic = c()
-muensterland_ae1 = c()
-muensterland_ae2 = c()
-muensterland_ae3 = c()
-muensterland_cc1 = c()
-muensterland_cc2 = c()
-muensterland_cc3 = c() # todo
-
 ger = c(ger_basic, ger_ae1, ger_ae2, ger_ae3, ger_cc1, ger_cc2, ger_cc3)
 ger_labels = c("ger_basic", "ger_ae1", "ger_ae2", "ger_ae3", "ger_cc1", "ger_cc2", "ger_cc3")
-muensterland = c(muensterland_basic, muensterland_ae1, muensterland_ae2, 
-                 muensterland_ae3, muensterland_cc1, muensterland_cc2, muensterland_cc3)
-muensterland_labels = c("muensterland_basic", "muensterland_ae1", "muensterland_ae2",
-                        "muensterland_ae3", "muensterland_cc1", "muensterland_cc2",
-                        "muensterland_cc3")
-
 boxplot(ger_basic, ger_ae1, ger_ae2, ger_ae3, ger_cc1, ger_cc2, ger_cc3, 
-        main="Germany: Our results of hare population after 20 ticks",
+        main="Our results of hare population after 20 ticks",
         names=ger_labels, xlab="Scenario", ylab="Hares per km^2")
-
-boxplot(muensterland_basic, muensterland_ae1, muensterland_ae2, muensterland_ae3,
-        muensterland_cc1, muensterland_cc2, muensterland_cc3, 
-        main="Muensterland: Our results of hare population after 20 ticks",
-        names=muensterland_labels, xlab="Scenario", ylab="Hares per km^2")
 
 paper_means = c(8.2, 12.7, 6.9, 12.8, 9.1, 10.3, 12.5)
 
