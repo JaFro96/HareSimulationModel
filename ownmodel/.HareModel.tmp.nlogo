@@ -238,7 +238,7 @@ to cultivate
 
      if (Scenario = "Silphie")
      [
-     set cropProbability [["wheat" 0.442] ["maize" 0.278] ["grassland" 0.149] ["rape" 0.021] ["alfalfa" 0.008] ["beets" 0.002] ["silphie" 0.100]]
+     set cropProbability [[["wheat" 0.442] ["maize" 0.278] ["grassland" 0.149] ["rape" 0.021] ["alfalfa" 0.008] ["beets" 0.002] ["silphie" 0.100]]
      ]
 
      if (Scenario = "Miscanthus")
@@ -258,7 +258,7 @@ to cultivate
 
      if (Scenario = "Set-aside")
      [
-     set cropProbability [["wheat" 0.442] ["maize" 0.299] ["grassland" 0.149] ["alfalfa" 0.008] ["beets" 0.002] ["set-aside" 0.100]] ; ["rape" 0.000]
+     set cropProbability [["wheat" 0.442] ["maize" 0.299] ["grassland" 0.149]  ["alfalfa" 0.008] ["beets" 0.002]]
      ]
   ]
 
