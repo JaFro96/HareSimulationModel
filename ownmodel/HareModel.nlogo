@@ -162,7 +162,23 @@ to cultivate
          set no no + 1
      ]
 
+     ; https://docplayer.org/8237661-Landwirtschaft-im-muensterland-daten-fakten-analysen.html
+     ; harvesting area in ha (entire Münsterland) - Chart available
+     ; 148.000 Getreide (0.44150374)
+     ; 63.600 Körnermais (0.18972728)
+     ; 63.000 Silomais (0.1879374)
+     ; 50.000 Grünland (0.14915667)
+     ; 7.200 Raps (0.02147856)
+     ; 2.800 Kartoffeln (0.00835277)
+     ; 618 Zuckerrüben (0.00184358)
+     ;335.218 TOTAL
 
+     ;means for Münsterland:
+
+     set cropProbability [["wheat" 0.44150374] ["rape" 0.02147856] ["maize" 0.37766468] ["barley" 0] ["grassland" 0.14915667] ["pasture" 0]
+                         ["beets" 0.00184358] ["alfalfa" 0.00835277] ["set-aside" 0] ["rye" 0.02147856]]
+
+    ;original settings below
 
      set cropProbability [["wheat" 0.375] ["rape" 0.187] ["maize" 0.150] ["barley" 0.092] ["grassland" 0.053] ["pasture" 0.053]
                          ["beets" 0.045] ["alfalfa" 0.015] ["set-aside" 0.015] ["rye" 0.014]]
