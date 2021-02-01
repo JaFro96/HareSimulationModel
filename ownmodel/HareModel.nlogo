@@ -173,9 +173,11 @@ to cultivate
      ; 618 Zuckerrüben (0.00184358)
      ;335.218 TOTAL
 
+     ;0.02147856 remaining! can be split up
+
      ;means for Münsterland:
 
-     set cropProbability [["wheat" 0.44150374] ["maize" 0.37766468] ["grassland" 0.14915667] ["rape" 0.02147856] ["rye" 0.02147856]
+     set cropProbability [["wheat" 0.44150374] ["maize" 0.37766468] ["grassland" 0.14915667] ["rape" 0.02147856]
                          ["alfalfa" 0.00835277] ["beets" 0.00184358]]
 
     ;original settings below
