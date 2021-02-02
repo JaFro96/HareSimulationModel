@@ -83,19 +83,43 @@ end
 ;; GO ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 to go
-     if (ticks = 20) [
-       print  "Number of turtles per km2: "
-       print (count turtles with [status = "female" or status = "male"] / 16)
-       stop
-     ]
+  let counter 0
+  while [counter < 4] [
+    let Scenarios ["Basic" "Silphie" "Miscanthus" "Grass-clover ley" "Alfalfa" "Set-aside" "Crop richness"]
+  foreach Scenarios [ s ->
+       clear-all
 
-     population
-     cultivate
-     calculate-habitat-suitability
-     search_homeRange_matures
-     reproduce
-     survive
-     tick
+       set initialPopulation 80
+       set Scenario s
+
+       init_landscape                 ;; imports the landscape from a text file
+       cultivate                      ;; crops are cultivated on the fields
+       init_calculate-suitability     ;; calculates habitat suitability for each cell
+       init_hares                     ;; ceates the initial population
+       init_search-homeRange          ;; hares search for a suitable, occupyable homeRange
+       init_calculate-suithomeRange   ;; calculates habitat suitability of the homeRange
+       update-view
+
+       reset-ticks
+       reset-timer
+
+       while [ticks < 20] [
+            population
+            cultivate
+            calculate-habitat-suitability
+            search_homeRange_matures
+            reproduce
+            survive
+            update-view
+            tick
+       ]
+
+       print s
+       print  "Number of turtles per km2: "
+       print precision (count turtles with [status != "juvenile" ] / 16) 2
+  ]
+    set counter counter + 1
+  ]
 
 end
 
@@ -230,7 +254,7 @@ to cultivate
                          ["miscanthus" 0.050] ["grass-clover ley" 0.050]]
      ]
   ][
-    ; Scenario = "Muensterland
+    ; Area = "Muensterland
     if (Scenario = "Basic")
      [
      set cropProbability [["wheat" 0.442] ["maize" 0.378] ["grassland" 0.149] ["rape" 0.021] ["alfalfa" 0.008] ["beets" 0.002]]
